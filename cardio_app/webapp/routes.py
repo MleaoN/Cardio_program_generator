@@ -156,5 +156,4 @@ def generate():
     except Exception as e:
         return render_template("error.html", message=f"Unhandled error in /generate: {e}"), 500
 
-app = Flask(__name__)
-app.register_blueprint(bp)
+
