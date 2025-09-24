@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul 15 12:18:44 2025
-
-@author: leaon
-"""
-"""
 Common utilities for PDF report generation
 """
 
+import os
 import re
 
-if os.environ.get("USE_TK", "0") == "1":
+USE_TK = os.environ.get("USE_TK", "0") == "1"
+
+if USE_TK:
     import tkinter as tk
     from tkinter import filedialog
 
 
 def format_seconds(seconds: float) -> str:
-    """
-    Convert seconds to a MM:SS string format.
-    """
+    """Convert seconds to a MM:SS string format."""
     try:
         seconds = float(seconds)
         minutes = int(seconds // 60)
@@ -29,24 +25,27 @@ def format_seconds(seconds: float) -> str:
 
 
 def safe_filename(name: str) -> str:
-    """
-    Sanitize a string to be safe for use as a filename.
-    """
+    """Sanitize a string to be safe for use as a filename."""
     return re.sub(r'[^a-zA-Z0-9_\-]', '_', name)
 
 
 def ask_save_filepath(default_name="cardio_report.pdf") -> str:
     """
-    Open a file dialog to ask the user for a save path for the PDF.
-    Returns full file path as a string or empty string if canceled.
+    Return a file path where the PDF should be saved.
+    - If Tkinter is enabled (local desktop use), open save dialog.
+    - Otherwise (Render server), return a default filename.
     """
-    root = tk.Tk()
-    root.withdraw()  # Hide root window
-    file_path = filedialog.asksaveasfilename(
-        defaultextension=".pdf",
-        filetypes=[("PDF files", "*.pdf")],
-        initialfile=default_name,
-        title="Save PDF Report As"
-    )
-    root.destroy()
-    return file_path
+    if USE_TK:
+        root = tk.Tk()
+        root.withdraw()  # Hide root window
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            initialfile=default_name,
+            title="Save PDF Report As"
+        )
+        root.destroy()
+        return file_path or ""
+    else:
+        # On Render (headless), just return a fixed filename in current dir
+        return os.path.join(os.getcwd(), default_name)
