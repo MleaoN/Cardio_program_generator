@@ -9,8 +9,10 @@ Common utilities for PDF report generation
 """
 
 import re
-import tkinter as tk
-from tkinter import filedialog
+
+if os.environ.get("USE_TK", "0") == "1":
+    import tkinter as tk
+    from tkinter import filedialog
 
 
 def format_seconds(seconds: float) -> str:
