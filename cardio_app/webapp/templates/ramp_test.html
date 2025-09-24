@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cardio Program - Ramp Test</title>
+    <style>
+        body {
+            background-color: #f0fff0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding-top: 40px;
+        }
+
+        .frame {
+            border: 4px double #006400;
+            padding: 20px;
+            background-color: #ffffff;
+            width: 700px;
+            box-sizing: border-box;
+        }
+
+        h1, h2 {
+            text-align: center;
+            font-weight: bold;
+            color: #006400;
+        }
+
+        h2 { color: #228B22; }
+
+        hr {
+            border: 2px solid black;
+            margin: 5px 0;
+        }
+
+        #ramp-test-entries {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .ramp-entry {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 5px; font-size: 14px; }
+
+        .buttons { margin-top: 20px; }
+        button {
+            background-color: #006400;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover { background-color: #228B22; }
+    </style>
+</head>
+<body>
+<div class="frame">
+    <h1>Cardio Program Generator</h1>
+    <hr><hr>
+    <h2>Bicycle Ramp Test</h2>
+
+    <form method="post" action="{{ url_for('routes.generate') }}">
+        <input type="hidden" name="client_name" value="{{ client_name }}">
+        <input type="hidden" name="unit" value="{{ unit }}">
+
+        <p>Insert your Ratio of Perceived Effort (RPE) for every step in the progressive load test.</p>
+        <p>Press Enter to add a new entry. Test finishes when RPE = 10 is entered.</p>
+
+        <div id="ramp-test-entries"></div>
+
+        <div class="buttons">
+            <button type="button" onclick="window.history.back()">Back</button>
+            <button type="submit">Next</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const rampContainer = document.getElementById('ramp-test-entries');
+    const unit = "{{ unit }}"; // mph or km/h
+    let stop = false;
+    let loadIndex = 1;
+
+    // Set initial load and increment based on unit
+    let currentLoad = unit === 'mph' ? 3 : 5;
+    let increment = unit === 'mph' ? 0.5 : 1;
+
+    function addRPEEntry() {
+        if (stop) return;
+
+        const div = document.createElement('div');
+        div.classList.add("ramp-entry");
+
+        // Load label
+        const loadLabel = document.createElement('label');
+        loadLabel.textContent = `Load: ${currentLoad.toFixed(1)} ${unit}`;
+        div.appendChild(loadLabel);
+
+        // RPE input
+        const rpeInput = document.createElement('input');
+        rpeInput.type = 'number';
+        rpeInput.min = 0;
+        rpeInput.max = 10;
+        rpeInput.step = 1;
+        rpeInput.name = `ramp_rpe_inputs`; // will be submitted as array
+        rpeInput.required = true;
+        rpeInput.dataset.load = currentLoad.toFixed(1); // save load in data attribute
+
+        rpeInput.addEventListener('keydown', function(e){
+            if(e.key === 'Enter'){
+                e.preventDefault();
+                const value = parseInt(this.value);
+                // Add hidden input with format "speed:RPE"
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'ramp_rpe_inputs';
+                hidden.value = `${this.dataset.load}:${value}`;
+                this.form.appendChild(hidden);
+
+                if(value === 10){
+                    stop = true;
+                    this.blur();
+                } else {
+                    // increment load
+                    currentLoad += increment;
+                    addRPEEntry();
+                    this.blur();
+                    rampContainer.lastChild.querySelector('input').focus();
+                }
+            }
+        });
+
+        div.appendChild(rpeInput);
+        rampContainer.appendChild(div);
+    }
+
+    // Start with first RPE entry
+    addRPEEntry();
+</script>
+</body>
+</html>

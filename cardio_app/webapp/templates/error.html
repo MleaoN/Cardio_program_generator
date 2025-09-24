@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8d7da;
+            color: #721c24;
+            margin: 2rem;
+        }
+        .error-box {
+            border: 1px solid #f5c6cb;
+            background-color: #f8d7da;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        h1 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-box">
+        <h1>⚠️ An Error Occurred</h1>
+        <p>{{ message }}</p>
+        <a href="{{ url_for('routes.index') }}">Go Back</a>
+    </div>
+</body>
+</html>

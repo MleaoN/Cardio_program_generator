@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cardio Program Generator</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f4f7fb;
+            color: #333;
+        }
+        .container {
+            width: 650px;
+            margin: 40px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 18px;
+            color: #007bff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Inline label + radios */
+        .unit-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 8px;
+        }
+        .unit-group span {
+            font-weight: bold;
+        }
+        .unit-group label {
+            font-weight: normal;
+        }
+
+        /* Ramp container */
+        .ramp-container {
+            margin-top: 20px;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow: hidden;
+        }
+        .ramp-container h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            color: #007bff;
+            text-align: center;
+        }
+        .ramp-container p {
+            font-size: 13px;
+            font-weight: bold;  /* bold description */
+            color: #444;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .ramp-entry {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .ramp-entry .speed-display {
+            font-weight: bold;
+            color: #007bff;
+            flex: 1;
+            text-align: center;
+            font-size: 15px;
+        }
+        .ramp-entry .rpe-input-box {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+        .ramp-entry input {
+            width: 55px;
+            text-align: center;
+            font-size: 13px;
+            padding: 5px;
+        }
+        .ramp-entry button {
+            padding: 5px 10px;
+            font-size: 13px;
+            border-radius: 4px;
+        }
+
+        /* Table compact */
+        #rampTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+        #rampTable thead th {
+            background: #007bff;
+            color: #fff;
+            padding: 5px;
+            border: 1px solid #007bff;
+            text-align: center;
+        }
+        #rampTable tbody {
+            display: block;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        #rampTable thead,
+        #rampTable tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        #rampTable td {
+            border: 1px solid #007bff;
+            padding: 5px;
+            text-align: center;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+    <h2>Cardio Program Generator</h2>
+    <form method="post" action="{{ url_for('routes.next_page') }}" id="cardioForm">
+
+        <!-- Client Name -->
+        <label for="client_name">Client Name</label>
+        <input type="text" id="client_name" name="client_name" required>
+
+        <!-- Unit row with radio buttons beside label -->
+        <div class="unit-group">
+            <span>Speed Unit:</span>
+            <label><input type="radio" name="unit" value="mph" checked> mph</label>
+            <label><input type="radio" name="unit" value="kmh"> km/h</label>
+        </div>
+
+        <!-- Ramp Test -->
+        <div class="ramp-container">
+            <h3>Treadmill Ramp Test</h3>
+            <p>Enter RPE (0–10) for each speed every 30s. Test ends when RPE=10.</p>
+
+            <div class="ramp-entry">
+                <div class="speed-display" id="currentSpeed">3 mph</div>
+                <div class="rpe-input-box">
+                    <input type="number" id="rpeInput" placeholder="RPE" min="0" max="10">
+                    <button type="button" id="addRPEBtn">Add</button>
+                </div>
+            </div>
+
+            <!-- Scrollable Table -->
+            <table id="rampTable">
+                <thead>
+                    <tr><th>Speed</th><th>RPE</th><th>Added</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <button type="submit">Next Page</button>
+    </form>
+</div>
+
+<script>
+    const unitRadios = document.getElementsByName('unit');
+    let nextSpeed = 3, speedIncrement = 0.5, stop = false;
+
+    function getUnit() {
+        return document.querySelector('input[name="unit"]:checked').value;
+    }
+
+    function resetRampTest() {
+        const unit = getUnit();
+        nextSpeed = (unit === 'mph') ? 3 : 5;
+        speedIncrement = (unit === 'mph') ? 0.5 : 1;
+        document.querySelector("#rampTable tbody").innerHTML = "";
+        document.getElementById('rpeInput').value = "";
+        stop = false;
+        document.getElementById('rpeInput').disabled = false;
+        updateSpeedDisplay();
+    }
+
+    function updateSpeedDisplay() {
+        document.getElementById("currentSpeed").textContent =
+            nextSpeed + " " + (getUnit() === "mph" ? "mph" : "km/h");
+    }
+
+    function addRPE() {
+        if (stop) return;
+        const rpeInput = document.getElementById('rpeInput');
+        const rpeValue = parseFloat(rpeInput.value);
+        if (isNaN(rpeValue) || rpeValue < 0 || rpeValue > 10) {
+            alert("RPE must be 0–10");
+            return;
+        }
+
+        const tbody = document.querySelector("#rampTable tbody");
+        const tr = document.createElement("tr");
+
+        const tdSpeed = document.createElement("td");
+        tdSpeed.textContent = nextSpeed;
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "ramp_rpe_inputs";
+        hiddenInput.value = nextSpeed + ":" + rpeValue;
+        tdSpeed.appendChild(hiddenInput);
+
+        const tdRPE = document.createElement("td");
+        tdRPE.textContent = rpeValue;
+        const tdAdd = document.createElement("td");
+        tdAdd.textContent = "✓";
+
+        tr.appendChild(tdSpeed);
+        tr.appendChild(tdRPE);
+        tr.appendChild(tdAdd);
+        tbody.appendChild(tr);
+
+        // Auto-scroll to latest entry
+        tbody.scrollTop = tbody.scrollHeight;
+
+        rpeInput.value = "";
+
+        if (rpeValue === 10) {
+            stop = true;
+            rpeInput.disabled = true;
+            alert("Ramp test completed.");
+        } else {
+            nextSpeed += speedIncrement;
+            updateSpeedDisplay();
+            rpeInput.focus();
+        }
+    }
+
+    unitRadios.forEach(r => r.addEventListener('change', resetRampTest));
+    document.getElementById('addRPEBtn').addEventListener('click', addRPE);
+    document.getElementById('rpeInput').addEventListener('keydown', e => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            addRPE();
+        }
+    });
+
+    resetRampTest();
+</script>
+</body>
+</html>

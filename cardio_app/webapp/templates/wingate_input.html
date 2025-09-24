@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Wingate Test Data Entry (Unit: {{ unit }})</h2>
+<form method="post" action="{{ url_for('routes.wingate_input') }}">
+    <p>Enter speed for each 5-second interval of the 30-second Wingate test (6 entries).</p>
+    <table border="1" cellpadding="5">
+        <tr>
+            {% for t in range(0, 30, 5) %}
+            <th>{{ t }} s</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for t in range(0, 30, 5) %}
+            <td>
+                <input type="number" step="0.1" min="0" name="speed_{{ t }}" value="{% if wingate_data %}{{ wingate_data.iloc[t//5]['Speed'] }}{% endif %}">
+            </td>
+            {% endfor %}
+        </tr>
+    </table>
+    <br>
+    <button type="submit">Next</button>
+    <button type="submit" name="action" value="skip">Skip Wingate</button>
+</form>
+{% endblock %}

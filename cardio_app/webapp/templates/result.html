@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Generated Cardio Program for {{ client_name }}</h2>
+<pre>{{ program_text }}</pre>
+
+<form method="post" action="{{ url_for('routes.save_pdf') }}">
+    <button type="submit">Save PDF Report</button>
+</form>
+
+<a href="{{ url_for('routes.index') }}">Start New Program</a>
+{% endblock %}

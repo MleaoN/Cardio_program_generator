@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cardio Program Generator - Step 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8; /* match index background */
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 500px;
+            margin: 40px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.95em;
+            color: #444;
+        }
+        select, input {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 0.9em;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            margin: 0 5px;
+            padding: 10px;
+            font-size: 0.95em;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-add {
+            background-color: #28a745;
+        }
+        .btn-add:hover {
+            background-color: #218838;
+        }
+        .btn-generate {
+            background-color: #007bff;
+        }
+        .btn-generate:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Cardio Program Generator</h2>
+    <form action="{{ url_for('routes.add_training') }}" method="post">
+        <!-- Training Type -->
+        <label for="training_type">Training Type:</label>
+        <select id="training_type" name="training_type" required>
+            <option value="explosive">Explosive</option>
+            <option value="endurance">Endurance</option>
+            <option value="power_endurance">Power Endurance</option>
+        </select>
+
+        <!-- Duration -->
+        <label for="duration">Training Duration (minutes):</label>
+        <input type="number" id="duration" name="duration" min="1" step="1" placeholder="e.g. 20">
+        <!-- removed required -->
+
+        <!-- Buttons -->
+        <div class="button-row">
+            <button type="submit" name="action" value="add" class="btn-add">➕ Add Training</button>
+            <button type="submit" formaction="{{ url_for('routes.generate') }}" formnovalidate class="btn-generate">📄 Generate PDF</button>
+        </div>
+<!-- Added programs list -->
+        {% if trainings %}
+        <div style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f0f8ff;">
+            <h3>Added Programs:</h3>
+            <ul>
+                {% for tr in trainings %}
+                <li>{{ tr.training_type | capitalize }} - {{ tr.duration }} minutes</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if message %}
+        <p style="color: green; font-weight: bold; margin-top: 10px;">{{ message }}</p>
+        {% endif %}
+    </form>
+</div>
+
+</body>
+</html>

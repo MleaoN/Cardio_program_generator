@@ -1,0 +1,8 @@
+reportlab       # for generating PDFs (used in pdf_report.py)
+fpdf            # only include if you actually use it in any module
+numpy           # for metric calculations
+pandas          # for dataframe creation/manipulation
+pillow          # image handling (used by reportlab/matplotlib)
+matplotlib      # visual plots in reports/pdf_visuals.py
+
+

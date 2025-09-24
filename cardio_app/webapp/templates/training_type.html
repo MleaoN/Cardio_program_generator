@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Select Training Type</h2>
+<form method="post" action="{{ url_for('routes.training_type') }}">
+    <input type="radio" id="explosive" name="training" value="explosive" {% if training=='explosive' %}checked{% endif %}>
+    <label for="explosive">Explosive Power</label><br>
+    <input type="radio" id="power_endurance" name="training" value="power_endurance" {% if training=='power_endurance' %}checked{% endif %}>
+    <label for="power_endurance">Power Endurance</label><br>
+    <input type="radio" id="endurance" name="training" value="endurance" {% if training=='endurance' %}checked{% endif %}>
+    <label for="endurance">Endurance</label><br><br>
+
+    <label for="session_time">Session time (minutes, ≥5):</label><br>
+    <input type="number" id="session_time" name="session_time" min="5" value="{{ session_time }}"><br><br>
+
+    <button type="submit">Next</button>
+</form>
+{% endblock %}
